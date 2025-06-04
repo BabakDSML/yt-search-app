@@ -60,7 +60,7 @@ def getVideoIDs():
             break
 
     # Save parquet
-    pl.DataFrame(video_record_list).write_parquet('data/video-ids.parquet')
+    pl.DataFrame(video_record_list).write_parquet('app/data/video-ids.parquet')
 
 # --- The rest of your original functions stay the same ---
 
@@ -74,9 +74,9 @@ def extractTranscriptText(transcript: list) -> str:
 
 def getVideoTranscripts():
     """
-        Function to extract transcripts for all video IDs stored in "data/video-ids.parquet"
+        Function to extract transcripts for all video IDs stored in "app/data/video-ids.parquet"
     """
-    df = pl.read_parquet('data/video-ids.parquet')
+    df = pl.read_parquet('app/data/video-ids.parquet')
 
     transcript_text_list = []
 
@@ -90,7 +90,7 @@ def getVideoTranscripts():
         transcript_text_list.append(transcript_text)
 
     df = df.with_columns(pl.Series(name="transcript", values=transcript_text_list))
-    df.write_parquet('data/video-transcripts.parquet')
+    df.write_parquet('app/data/video-transcripts.parquet')
 
 
 def handleSpecialStrings(df: pl.dataframe.frame.DataFrame) -> pl.dataframe.frame.DataFrame:
@@ -119,17 +119,17 @@ def transformData():
     """
         Function to preprocess video data
     """
-    df = pl.read_parquet('data/video-transcripts.parquet')
+    df = pl.read_parquet('app/data/video-transcripts.parquet')
     df = handleSpecialStrings(df)
     df = setDatatypes(df)
-    df.write_parquet('data/video-transcripts.parquet')
+    df.write_parquet('app/data/video-transcripts.parquet')
 
 
 def createTextEmbeddings():
     """
         Function to generate text embeddings of video titles and transcripts
     """
-    df = pl.read_parquet('data/video-transcripts.parquet')
+    df = pl.read_parquet('app/data/video-transcripts.parquet')
 
     model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -143,4 +143,4 @@ def createTextEmbeddings():
 
         df = pl.concat([df, df_embedding], how='horizontal')
 
-    df.write_parquet('data/video-index.parquet')
+    df.write_parquet('app/data/video-index.parquet')
